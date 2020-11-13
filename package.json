@@ -1,0 +1,31 @@
+{
+  "name": "maestro-fastify",
+  "version": "0.0.1",
+  "description": "Auria Maestro - Fastify Adapter",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "Auria",
+    "Maestro",
+    "Fastify",
+    "Adapter",
+    "HTTP",
+    "Server",
+    "Nodejs"
+  ],
+  "author": "Nicholas Frai",
+  "license": "MIT",
+  "dependencies": {
+    "fastify": "^3.8.0",
+    "fastify-cookie": "^4.1.0",
+    "fastify-helmet": "^5.0.3",
+    "fastify-multipart": "^3.3.0",
+    "tslib": "^2.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^14.14.7"
+  }
+}
