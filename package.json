@@ -1,7 +1,7 @@
 {
   "name": "maestro-fastify",
   "version": "0.0.1",
-  "description": "Auria Maestro - Fastify Adapter",
+  "description": "Maestro - Fastify Adapter",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
