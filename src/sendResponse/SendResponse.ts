@@ -1,4 +1,4 @@
-import { ICommand, IApiRouteResponse } from 'auria-maestro';
+import { ICommand, IApiRouteResponse } from 'maestro';
 import { FastifyReply } from 'fastify';
 import { Adapter } from '../Adapter';
 import { Commands } from '../commands/Commands';

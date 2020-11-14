@@ -1,4 +1,4 @@
-import { ICommandResolver, IncorrectAdapter } from "auria-maestro";
+import { ICommandResolver, IncorrectAdapter } from "maestro";
 import { Adapter } from "../Adapter";
 
 export const CreateCookie: ICommandResolver = {

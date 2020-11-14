@@ -1,4 +1,4 @@
-import { IRouteRequest, RouteRequest } from 'auria-maestro';
+import { IRouteRequest, RouteRequest } from 'maestro';
 import { FastifyRequest } from 'fastify';
 import { Adapter } from '../Adapter';
 

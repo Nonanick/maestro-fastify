@@ -8,7 +8,7 @@ import { ErrorHandler } from './error/ErrorHandler';
 import { Events } from './events/Events';
 import { SendResponse } from './sendResponse/SendResponse';
 import { TransformRequest } from './transformRequest/TransformRequest';
-import { Container, HTTPMethod, IAdapter, ICommand, IContainer, IProxiedRoute, Maestro, RequestFlowNotDefined } from 'auria-maestro';
+import { Container, HTTPMethod, IAdapter, ICommand, IContainer, IProxiedRoute, Maestro, RequestFlowNotDefined } from 'maestro';
 
 export class Adapter extends EventEmitter implements IAdapter {
 

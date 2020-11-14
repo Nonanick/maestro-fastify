@@ -1,4 +1,4 @@
-import { ApiError, ApiException } from 'auria-maestro';
+import { ApiError, ApiException } from 'maestro';
 import { FastifyReply } from 'fastify';
 
 export function ErrorHandler(
