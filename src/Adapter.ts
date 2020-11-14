@@ -123,6 +123,7 @@ export class Adapter extends EventEmitter implements IAdapter {
     route: IProxiedRoute,
     method: HTTPMethod,
     request: FastifyRequest,
+    matchedPattern: string,
     response: FastifyReply
   ) => {
     let returnToFastify = new Promise<any>(async (resolve, reject) => {
@@ -141,7 +142,7 @@ export class Adapter extends EventEmitter implements IAdapter {
       }
 
       // Create API Request
-      let apiRequest = await this._transformRequest(request);
+      let apiRequest = await this._transformRequest(request, matchedPattern);
       apiRequest.method = method;
 
       // Send it to API Handler
@@ -354,7 +355,7 @@ export class Adapter extends EventEmitter implements IAdapter {
         method: method.toLocaleUpperCase() as any,
         url,
         handler: async (req, res) => {
-          return await this._requestHandler(route, method, req, res);
+          return await this._requestHandler(route, method, req, url, res);
         },
       }
     );

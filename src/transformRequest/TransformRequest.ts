@@ -2,9 +2,9 @@ import { IRouteRequest, RouteRequest } from 'maestro';
 import { FastifyRequest } from 'fastify';
 import { Adapter } from '../Adapter';
 
-export async function TransformRequest(request: FastifyRequest): Promise<IRouteRequest> {
+export async function TransformRequest(request: FastifyRequest, matchedPattern: string): Promise<IRouteRequest> {
 
-  let req: IRouteRequest = new RouteRequest(Adapter.ADAPTER_NAME, request.url);
+  let req: IRouteRequest = new RouteRequest(Adapter.ADAPTER_NAME, request.url, matchedPattern);
 
   //  Request Identification in Express is List of IP's + User Agent
   let requestIdentification = (request.ips != null ? request.ips.join(' - ') : request.ip)
