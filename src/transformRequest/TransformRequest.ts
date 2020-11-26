@@ -61,6 +61,7 @@ export async function TransformRequest(request: FastifyRequest, matchedPattern: 
     );
   }
 
+  req.setAsRaw();
   /*for await (let singleFile of files) {
     req.addParameter(
       singleFile.fieldname,

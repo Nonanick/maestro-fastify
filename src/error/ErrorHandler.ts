@@ -3,16 +3,32 @@ import { FastifyReply } from 'fastify';
 
 export function ErrorHandler(
 	response: FastifyReply,
-	error: ApiError | ApiException | Error,
+	error: ApiError | ApiException | Error | any,
 	resolve: (value?: any) => void,
 	reject: (reason?: any) => void
 ) {
-	if (error instanceof ApiError) {
-		response.status(error.httpStatus);
-		response.send(error.message);
-		resolve(error.message);
+
+	let errorPayload: ErrorPayload = {
+		exitCode: 'REQUEST_REFUSED',
+		message: error.message
+	};
+
+	if (typeof error.exitCode === 'string') {
+		errorPayload.exitCode = error.exitCode;
+	}
+
+	if (typeof error.httpStatus! === 'number') {
+		response.status(error.httpStatus!);
+		resolve(errorPayload);
 	} else {
 		response.status(500);
-		reject(error.message);
+		reject(errorPayload);
 	}
+
 }
+
+type ErrorPayload = {
+	exitCode: string;
+	message: string;
+	reason?: string;
+};

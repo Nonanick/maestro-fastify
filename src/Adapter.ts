@@ -159,6 +159,7 @@ export class Adapter extends EventEmitter implements IAdapter {
         }
       );
     });
+
     return returnToFastify;
 
   };
@@ -275,7 +276,7 @@ export class Adapter extends EventEmitter implements IAdapter {
 
     this.fastify.register(fastifyMultipart);
 
-    console.debug("\nAll available routes:\n----------------------");
+    console.debug("\nRoute Descriptions:\n----------------------\n");
     // Add all routes from currently known containers
     this.loadRoutesFromContainers(this.containers);
     console.debug();
@@ -287,14 +288,13 @@ export class Adapter extends EventEmitter implements IAdapter {
    * ---------------------------
    * Crawls into the container fetching all exposed routes
    * Assign them to the fastify server using the adapters
-   * *Request Hanlder*
+   * *Request Handler*
    * 
    * @param containers All Containers that will have their api routes exposed
    */
   loadRoutesFromContainers(containers: IContainer[]) {
 
     for (let container of containers) {
-
       const allRoutes = container.allRoutes();
 
       for (let route of allRoutes) {
@@ -310,13 +310,14 @@ export class Adapter extends EventEmitter implements IAdapter {
           methods = route.methods;
         }
 
-        methods.forEach(
-          m => console.debug(`${m.toLocaleUpperCase()}\t- ${route.url}`)
-        );
+        this.describeRoute(route, methods);
+
+        // methods.forEach(
+        //   m => console.debug(`${m.toLocaleUpperCase()}\t- ${route.url}`)
+        // );
         for (let method of methods) {
           this.addRouteToHttpMethod(method, route);
         }
-
 
         this._loadedRoutes.push(route);
 
@@ -324,6 +325,44 @@ export class Adapter extends EventEmitter implements IAdapter {
     }
   }
 
+  public describeRoute(route: IProxiedRoute, methods: HTTPMethod[]) {
+
+    console.log(
+      '\x1b[1m• ' + route.url + ' \x1b[0m'
+      + `[${methods.map(m => {
+        return `\x1b[93m${m.toLocaleUpperCase()}`;
+      }).join(',')
+      }` + '\x1b[0m]',
+    );
+
+    if (typeof route.resolver === 'string') {
+      console.log(
+        '\x1b[92m' + 'Handler:',
+        '\x1b[90m', route.controller.constructor.name + '.'
+        + '\x1b[0m' + route.resolver
+      );
+    } else {
+      console.log(
+        '\x1b[92m' + 'Handler: ',
+        '\x1b[90m', route.controller.constructor.name + '.'
+        + '\x1b[0m' + route.resolver.name
+      );
+    }
+
+    if (route.requestProxies.length > 0) {
+      console.log(
+        '\x1b[1m\x1b[35m' + 'Request Proxy:\x1b[0m' + route.requestProxies.map(p => "\n- " + p.name).join('')
+      );
+    }
+
+    if (route.responseProxies.length > 0) {
+      console.log(
+        '\x1b[1m\x1b[34m' + 'Response Proxy:\x1b[0m' + route.responseProxies.map(p => "\n- " + p.name).join('')
+      );
+    }
+
+    console.log();
+  }
   /**
    * Add Route to HTTP Method
    * ------------------------
@@ -436,4 +475,20 @@ export class Adapter extends EventEmitter implements IAdapter {
 
 type RoutesByURL = {
   [routeURL: string]: IProxiedRoute;
+};
+
+const ConsoleMethodColor: {
+  [method in HTTPMethod]: string
+} = {
+  all: '97',
+  connect: '97',
+  delete: '91',
+  get: '92',
+  head: '35',
+  options: '35',
+  patch: '93',
+  post: '96',
+  put: '94',
+  search: '35',
+  trace: '35'
 };
