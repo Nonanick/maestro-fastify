@@ -36,6 +36,9 @@ export class Adapter extends EventEmitter implements IAdapter {
     return this._port;
   }
 
+  get raw() {
+    return this.fastify;
+  }
   /**
    * Fastify application
    * -------------------
@@ -189,7 +192,6 @@ export class Adapter extends EventEmitter implements IAdapter {
   constructor(port: number, options?: FastifyServerOptions);
   constructor(portOrOptions?: number | FastifyServerOptions, options?: FastifyServerOptions) {
     super();
-
     if (typeof portOrOptions === 'number') {
       this.fastify = fastify(options);
       this.onPort(portOrOptions);
@@ -272,7 +274,7 @@ export class Adapter extends EventEmitter implements IAdapter {
       secret: '',
     });
 
-    this.fastify.register(fastifyHelmet);
+    // this.fastify.register(fastifyHelmet);
 
     this.fastify.register(fastifyMultipart);
     console.debug("\n> Launching server on: " + this._port);
@@ -396,6 +398,9 @@ export class Adapter extends EventEmitter implements IAdapter {
         handler: async (req, res) => {
           return await this._requestHandler(route, method, req, url, res);
         },
+        schema: {
+          response: route.schema?.response
+        }
       }
     );
 
