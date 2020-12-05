@@ -275,7 +275,7 @@ export class Adapter extends EventEmitter implements IAdapter {
     this.fastify.register(fastifyHelmet);
 
     this.fastify.register(fastifyMultipart);
-
+    console.debug("\n> Launching server on: " + this._port);
     console.debug("\nRoute Descriptions:\n----------------------\n");
     // Add all routes from currently known containers
     this.loadRoutesFromContainers(this.containers);
@@ -339,13 +339,13 @@ export class Adapter extends EventEmitter implements IAdapter {
       console.log(
         '\x1b[92m' + 'Handler:',
         '\x1b[90m', route.controller.constructor.name + '.'
-        + '\x1b[0m' + route.resolver
+        + '\x1b[0m' + route.resolver.replace(/^bound /, '')
       );
     } else {
       console.log(
         '\x1b[92m' + 'Handler: ',
         '\x1b[90m', route.controller.constructor.name + '.'
-        + '\x1b[0m' + route.resolver.name
+        + '\x1b[0m' + route.resolver.name.replace(/^bound /, '')
       );
     }
 

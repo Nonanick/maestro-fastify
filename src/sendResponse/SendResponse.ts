@@ -1,10 +1,10 @@
-import { ICommand, IApiRouteResponse } from 'maestro';
+import { ICommand, IRouteResponse } from 'maestro';
 import { FastifyReply } from 'fastify';
 import { Adapter } from '../Adapter';
 import { Commands } from '../commands/Commands';
 
 export function SendResponse(
-	routeResp: IApiRouteResponse,
+	routeResp: IRouteResponse,
 	response: FastifyReply,
 	resolve: (value?: any) => void
 ) {
