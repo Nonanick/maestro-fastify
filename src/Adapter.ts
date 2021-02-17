@@ -304,6 +304,11 @@ export class Adapter extends EventEmitter implements IAdapter {
         if (this._loadedRoutes.includes(route)) {
           continue;
         }
+
+        if (route.methods == null) {
+          route.methods = 'get';
+        }
+
         let methods: HTTPMethod[];
 
         if (!Array.isArray(route.methods)) {
@@ -328,6 +333,9 @@ export class Adapter extends EventEmitter implements IAdapter {
   }
 
   public describeRoute(route: IProxiedRoute, methods: HTTPMethod[]) {
+    if (typeof methods == "string" || methods == null) {
+      methods = ['get'];
+    }
 
     console.log(
       '\x1b[1m• ' + route.url + ' \x1b[0m'
