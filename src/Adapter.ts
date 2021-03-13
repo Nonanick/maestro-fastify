@@ -304,6 +304,11 @@ export class Adapter extends EventEmitter implements IAdapter {
         if (this._loadedRoutes.includes(route)) {
           continue;
         }
+        
+        if(route.methods == null) {
+          route.methods = ['get'];
+        }
+
         let methods: HTTPMethod[];
 
         if (!Array.isArray(route.methods)) {
@@ -382,6 +387,8 @@ export class Adapter extends EventEmitter implements IAdapter {
     } else {
       url = route.url.trim();
     }
+
+    if(url === "") url = "/";
 
     // Handle 'search' http method, currently unsupported by fastify - Transformed into 'ALL'
     if (['search', 'all'].includes(method)) {
