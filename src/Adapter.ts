@@ -391,6 +391,7 @@ export class Adapter extends EventEmitter implements IAdapter {
       url = route.url.trim();
     }
 
+    console.log('Fastify >', `'${url}'`);
     if(url === "") url = "/";
 
     // Handle 'search' http method, currently unsupported by fastify - Transformed into 'ALL'
