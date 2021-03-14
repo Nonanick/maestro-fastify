@@ -277,11 +277,10 @@ export class Adapter extends EventEmitter implements IAdapter {
     // this.fastify.register(fastifyHelmet);
 
     this.fastify.register(fastifyMultipart);
-    console.debug("\n> Launching server on: " + this._port);
-    console.debug("\nRoute Descriptions:\n----------------------\n");
+    console.debug(`🚀 \x1b[1m[Maestro: Fastify Adapter]\x1b[0m Launching server on port ` + this._port);
+    console.debug("\n\x1b[1mRoute Descriptions:\x1b[0m\n========================\n");
     // Add all routes from currently known containers
     this.loadRoutesFromContainers(this.containers);
-    console.debug();
     this._booted = true;
   }
 
@@ -333,6 +332,8 @@ export class Adapter extends EventEmitter implements IAdapter {
   }
 
   public describeRoute(route: IProxiedRoute, methods: HTTPMethod[]) {
+    if(route.url === "") route.url = "/";
+    
     if (typeof methods == "string" || methods == null) {
       methods = ['get'];
     }
@@ -391,7 +392,6 @@ export class Adapter extends EventEmitter implements IAdapter {
       url = route.url.trim();
     }
 
-    console.log('Fastify >', `'${url}'`);
     if(url === "") url = "/";
 
     // Handle 'search' http method, currently unsupported by fastify - Transformed into 'ALL'
