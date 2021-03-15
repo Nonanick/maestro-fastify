@@ -2,6 +2,7 @@ import { EventEmitter } from 'events';
 import fastify, { FastifyInstance, FastifyReply, FastifyRequest, FastifyServerOptions } from 'fastify';
 import fastifyCookie, { CookieSerializeOptions } from 'fastify-cookie';
 import fastifyHelmet from 'fastify-helmet';
+import type { Logger } from 'pino';
 import fastifyMultipart from 'fastify-multipart';
 import { Server } from 'http';
 import { ErrorHandler } from './error/ErrorHandler';
@@ -188,9 +189,9 @@ export class Adapter extends EventEmitter implements IAdapter {
    */
   protected _errorHandler: typeof ErrorHandler = ErrorHandler;
 
-  constructor(options?: FastifyServerOptions);
-  constructor(port: number, options?: FastifyServerOptions);
-  constructor(portOrOptions?: number | FastifyServerOptions, options?: FastifyServerOptions) {
+  constructor(options?: FastifyServerOptions<Server, Logger>);
+  constructor(port: number, options?: FastifyServerOptions<Server, Logger>);
+  constructor(portOrOptions?: number | FastifyServerOptions<Server, Logger>, options?: FastifyServerOptions<Server, Logger>) {
     super();
     if (typeof portOrOptions === 'number') {
       this.fastify = fastify(options);
@@ -274,11 +275,11 @@ export class Adapter extends EventEmitter implements IAdapter {
       secret: '',
     });
 
-    // this.fastify.register(fastifyHelmet);
+    this.fastify.register(fastifyHelmet);
 
     this.fastify.register(fastifyMultipart);
     console.debug(`🚀 \x1b[1m[Maestro: Fastify Adapter]\x1b[0m Launching server on port ` + this._port);
-    console.debug("\n\x1b[1mRoute Descriptions:\x1b[0m\n========================\n");
+    console.debug("\n\x1b[1m Routes:\x1b[0m\n========\n");
     // Add all routes from currently known containers
     this.loadRoutesFromContainers(this.containers);
     this._booted = true;
@@ -332,14 +333,14 @@ export class Adapter extends EventEmitter implements IAdapter {
   }
 
   public describeRoute(route: IProxiedRoute, methods: HTTPMethod[]) {
-    if(route.url === "") route.url = "/";
-    
+    if (route.url === "") route.url = "/";
+
     if (typeof methods == "string" || methods == null) {
       methods = ['get'];
     }
 
     console.log(
-      '\x1b[1m• ' + route.url + ' \x1b[0m'
+      ' \x1b[1m• ' + route.url + ' \x1b[0m'
       + `[${methods.map(m => {
         return `\x1b[93m${m.toLocaleUpperCase()}`;
       }).join(',')
@@ -348,13 +349,13 @@ export class Adapter extends EventEmitter implements IAdapter {
 
     if (typeof route.resolver === 'string') {
       console.log(
-        '\x1b[92m' + 'Handler:',
+        '\x1b[92m' + ' Handler:',
         '\x1b[90m', route.controller.constructor.name + '.'
         + '\x1b[0m' + route.resolver.replace(/^bound /, '')
       );
     } else {
       console.log(
-        '\x1b[92m' + 'Handler: ',
+        '\x1b[92m' + ' Handler: ',
         '\x1b[90m', route.controller.constructor.name + '.'
         + '\x1b[0m' + route.resolver.name.replace(/^bound /, '')
       );
@@ -362,13 +363,13 @@ export class Adapter extends EventEmitter implements IAdapter {
 
     if (route.requestProxies.length > 0) {
       console.log(
-        '\x1b[1m\x1b[35m' + 'Request Proxy:\x1b[0m' + route.requestProxies.map(p => "\n- " + p.name).join('')
+        '\x1b[1m\x1b[35m' + ' Request Proxy:\x1b[0m' + route.requestProxies.map(p => "\n- " + p.name).join('')
       );
     }
 
     if (route.responseProxies.length > 0) {
       console.log(
-        '\x1b[1m\x1b[34m' + 'Response Proxy:\x1b[0m' + route.responseProxies.map(p => "\n- " + p.name).join('')
+        '\x1b[1m\x1b[34m' + ' Response Proxy:\x1b[0m' + route.responseProxies.map(p => "\n- " + p.name).join('')
       );
     }
 
@@ -392,7 +393,7 @@ export class Adapter extends EventEmitter implements IAdapter {
       url = route.url.trim();
     }
 
-    if(url === "") url = "/";
+    if (url === "") url = "/";
 
     // Handle 'search' http method, currently unsupported by fastify - Transformed into 'ALL'
     if (['search', 'all'].includes(method)) {
