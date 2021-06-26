@@ -2,18 +2,20 @@ import { EventEmitter } from 'events';
 import fastify, { FastifyInstance, FastifyReply, FastifyRequest, FastifyServerOptions } from 'fastify';
 import fastifyCookie, { CookieSerializeOptions } from 'fastify-cookie';
 import fastifyHelmet from 'fastify-helmet';
-import type { Logger } from 'pino';
+import type { FastifyLoggerInstance } from 'fastify';
 import fastifyMultipart from 'fastify-multipart';
 import { Server } from 'http';
 import { ErrorHandler } from './error/ErrorHandler';
 import { Events } from './events/Events';
 import { SendResponse } from './sendResponse/SendResponse';
 import { TransformRequest } from './transformRequest/TransformRequest';
-import { Container, HTTPMethod, IAdapter, ICommand, IContainer, IProxiedRoute, Maestro, RequestFlowNotDefined } from 'maestro';
+import { Container, HTTPMethod, IAdapter, ICommand, IContainer, IProxiedRoute, Log, Maestro, RequestFlowNotDefined } from 'maestro';
 
-export class Adapter extends EventEmitter implements IAdapter {
+export class Adapter<Srv extends Server = Server, Lg = FastifyLoggerInstance> extends EventEmitter implements IAdapter {
 
   public static ADAPTER_NAME = "Fastify";
+
+  static DEFAULT_PORT = 3301;
 
   public static CreateCookie = (name: string, value: string, options: CookieSerializeOptions) => {
     let command: ICommand = {
@@ -46,7 +48,7 @@ export class Adapter extends EventEmitter implements IAdapter {
    * Holds the actual fastify application
    * 
    */
-  protected fastify: FastifyInstance;
+  protected fastify: FastifyInstance<Srv>;
 
   /**
    * Containers
@@ -82,7 +84,7 @@ export class Adapter extends EventEmitter implements IAdapter {
    * ------
    * HTTP Server created when the adapter is started
    */
-  protected _server?: Server;
+  protected _server?: Srv;
 
   /**
    * Loaded Routes
@@ -189,9 +191,9 @@ export class Adapter extends EventEmitter implements IAdapter {
    */
   protected _errorHandler: typeof ErrorHandler = ErrorHandler;
 
-  constructor(options?: FastifyServerOptions<Server, Logger>);
-  constructor(port: number, options?: FastifyServerOptions<Server, Logger>);
-  constructor(portOrOptions?: number | FastifyServerOptions<Server, Logger>, options?: FastifyServerOptions<Server, Logger>) {
+  constructor(options?: FastifyServerOptions<Srv, FastifyLoggerInstance>);
+  constructor(port: number, options?: FastifyServerOptions<Srv, FastifyLoggerInstance>);
+  constructor(portOrOptions?: number | FastifyServerOptions<Srv, FastifyLoggerInstance>, options?: FastifyServerOptions<Srv, FastifyLoggerInstance>) {
     super();
     if (typeof portOrOptions === 'number') {
       this.fastify = fastify(options);
@@ -199,6 +201,7 @@ export class Adapter extends EventEmitter implements IAdapter {
     } else {
       this.fastify = fastify(options);
     }
+
   }
 
   /**
@@ -278,8 +281,14 @@ export class Adapter extends EventEmitter implements IAdapter {
     this.fastify.register(fastifyHelmet);
 
     this.fastify.register(fastifyMultipart);
-    console.debug(`🚀 \x1b[1m[Maestro: Fastify Adapter]\x1b[0m Launching server on port ` + this._port);
-    console.debug("\n\x1b[1m Routes:\x1b[0m\n========\n");
+
+    if (isNaN(this._port)) {
+      Log.warn({ port: this._port }, `Port is not a number, setting default port [${Adapter.DEFAULT_PORT}]!`);
+      this._port = Adapter.DEFAULT_PORT;
+    }
+
+    Log.debug(`🚀 \x1b[1m[Maestro: Fastify Adapter]\x1b[0m Launching server on port ` + this._port);
+    Log.debug("\n\x1b[1m Routes:\x1b[0m\n========\n");
     // Add all routes from currently known containers
     this.loadRoutesFromContainers(this.containers);
     this._booted = true;
@@ -339,7 +348,7 @@ export class Adapter extends EventEmitter implements IAdapter {
       methods = ['get'];
     }
 
-    console.log(
+    Log.info(
       ' \x1b[1m• ' + route.url + ' \x1b[0m'
       + `[${methods.map(m => {
         return `\x1b[93m${m.toLocaleUpperCase()}`;
@@ -348,13 +357,13 @@ export class Adapter extends EventEmitter implements IAdapter {
     );
 
     if (typeof route.resolver === 'string') {
-      console.log(
+      Log.info(
         '\x1b[92m' + ' Handler:',
         '\x1b[90m', route.controller.constructor.name + '.'
         + '\x1b[0m' + route.resolver.replace(/^bound /, '')
       );
     } else {
-      console.log(
+      Log.info(
         '\x1b[92m' + ' Handler: ',
         '\x1b[90m', route.controller.constructor.name + '.'
         + '\x1b[0m' + route.resolver.name.replace(/^bound /, '')
@@ -362,18 +371,17 @@ export class Adapter extends EventEmitter implements IAdapter {
     }
 
     if (route.requestProxies.length > 0) {
-      console.log(
+      Log.info(
         '\x1b[1m\x1b[35m' + ' Request Proxy:\x1b[0m' + route.requestProxies.map(p => "\n- " + p.name).join('')
       );
     }
 
     if (route.responseProxies.length > 0) {
-      console.log(
+      Log.info(
         '\x1b[1m\x1b[34m' + ' Response Proxy:\x1b[0m' + route.responseProxies.map(p => "\n- " + p.name).join('')
       );
     }
 
-    console.log();
   }
   /**
    * Add Route to HTTP Method
@@ -397,7 +405,7 @@ export class Adapter extends EventEmitter implements IAdapter {
 
     // Handle 'search' http method, currently unsupported by fastify - Transformed into 'ALL'
     if (['search', 'all'].includes(method)) {
-      console.warn(
+      Log.warn(
         'Fastify adapter does not support "' + method.toLocaleUpperCase() + '" HTTP verb, serving route as POST instead'
       );
       method = 'post';
@@ -468,6 +476,12 @@ export class Adapter extends EventEmitter implements IAdapter {
 
   start() {
     this.boot();
+
+    if (isNaN(this._port)) {
+      Log.error('[Fastify Adapter] Port is not a number, using default port [3303]!');
+      this._port = 3303;
+    }
+
     this.fastify.listen(this._port > 0 ? this._port : 3031);
     this._server = this.fastify.server;
     this._started = true;

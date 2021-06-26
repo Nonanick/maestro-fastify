@@ -6,7 +6,7 @@ export async function TransformRequest(request: FastifyRequest, matchedPattern: 
 
   let req: IRouteRequest = new RouteRequest(Adapter.ADAPTER_NAME, request.url, matchedPattern);
 
-  //  Request Identification in Express is List of IP's + User Agent
+  //  Request Identification in Fastify is List of IP's + User Agent
   let requestIdentification = (request.ips != null ? request.ips.join(' - ') : request.ip)
     + " | "
     + request.headers["user-agent"] ?? "UA-NOT-PROVIDED";

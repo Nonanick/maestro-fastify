@@ -13,12 +13,12 @@ export function ErrorHandler(
 		message: error.message
 	};
 
-	if (typeof error.exitCode === 'string') {
+	if (typeof error.exitCode === 'string' ) {
 		errorPayload.exitCode = error.exitCode;
 	}
 
-	if (typeof error.httpStatus! === 'number') {
-		response.status(error.httpStatus!);
+	if (typeof error.httpCode! === 'number') {
+		response.status(error.httpCode!);
 		resolve(errorPayload);
 	} else {
 		response.status(500);
